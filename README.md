@@ -1,21 +1,34 @@
 #.NET MVC Unused View Finder
-=============================
 
 Simple python script to find view references.
 
+
 ##Usage
+
+
+Testing the script:
+
+```sh
+python finder.py Test
+```
+
+
+Use it in you app:
 
 ```sh
 python finder.py [your application path]
 ```
 
-If you want to save the output, you can always...
+
+If you want to save the output:
 
 ```sh
 python finder.py [your application path] > log.txt
 ```
 
+
 ##Output
+
 
 The output will be something like this:
 
