@@ -1,5 +1,7 @@
 #.NET MVC Unused View Finder
 
+Python version: 2.7.8
+
 Simple python script to find view references.
 
 
