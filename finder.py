@@ -35,6 +35,7 @@ def main(argv):
 			continue
 		
 		for reference in references:
+			print("file name: ", reference[0])
 			print("line number: ", reference[1])
 			print("line text: ", reference[2])
 			print()
@@ -49,12 +50,12 @@ def find_references_for_view_file(directory, viewfilename):
 	references = []
 
 	for root, directories, files in os.walk(directory):
-		for filename in [f for f in files if any([f.endswith(ext) for ext in FILES_TO_SEARCH])]:
+		for filename in [f for f in files if any([f.endswith(ext) for ext in FILES_TO_SEARCH]) and not f == viewfilename + VIEW_EXTENSION]:
 			with open(os.path.join(root, filename), 'r') as searchfile:
 				linenumber = 0
 				for line in searchfile:
 					linenumber += 1
-					if viewfilename in line:
+					if '"' + viewfilename + '"' in line if filename.endswith(VIEW_EXTENSION) else viewfilename in line :
 						references.append((filename, linenumber, line))
 
 	return references
