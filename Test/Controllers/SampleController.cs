@@ -1,4 +1,4 @@
-public TestController : Controller
+public SampleController : Controller
 {
 	public ActionView UsedView()
 	{

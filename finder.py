@@ -4,6 +4,8 @@ import os
 
 VIEW_EXTENSION = ".cshtml"
 
+FILES_TO_SEARCH = [".cshtml", "Controller.cs"]
+
 def main(argv):
 	directory = argv[0]
 
@@ -47,7 +49,7 @@ def find_references_for_view_file(directory, viewfilename):
 	references = []
 
 	for root, directories, files in os.walk(directory):
-		for filename in files:
+		for filename in [f for f in files if any([f.endswith(ext) for ext in FILES_TO_SEARCH])]:
 			with open(os.path.join(root, filename), 'r') as searchfile:
 				linenumber = 0
 				for line in searchfile:
