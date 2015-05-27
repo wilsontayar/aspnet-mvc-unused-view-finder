@@ -31,6 +31,8 @@ def main(argv):
 
 	print("USING: {0} files".format(len(results['using'])))
 	print("NOT USING: {0} files".format(len(results['not_using'])))
+	for file in results['not_using']:
+		print(file)
 
 def print_break():
 	print("-" * 45)
