@@ -2,7 +2,7 @@ import sys
 import os
 
 LOOKUP_EXTENSIONS = [".cshtml", ".gif", ".jpg", ".png", ".js", ".css"]
-FILES_TO_SEARCH = [".cshtml", "Controller.cs", ".css", ".less", ".js"]
+FILES_TO_SEARCH = [".cshtml", ".cs", ".css", ".less", ".js"]
 
 def main(argv):
 	directory = argv[0]
@@ -24,7 +24,7 @@ def main(argv):
 	for file_name in files_to_look_for:
 		references, looked_at = find_references_for_view_file(directory, file_name)
 
-		if not references:
+		if references:
 			results['using'].append(file_name)
 		else:
 			results['not_using'].append(file_name)
@@ -37,6 +37,12 @@ def main(argv):
 def print_break():
 	print("-" * 45)
 
+def prepare_file_name_to_look_for(file_name):
+	if ".cshtml" in file_name:
+		return file_name.replace(".cshtml", "")
+
+	return file_name
+
 def find_references_for_view_file(directory, file_name):
 	using = []
 	looking_in = []
@@ -46,7 +52,7 @@ def find_references_for_view_file(directory, file_name):
 			looking_in.append(os.path.join(root, filename))
 			with open(os.path.join(root, filename), 'r', encoding="ISO-8859-1") as searchfile:
 				content = searchfile.read()
-				if file_name in content:
+				if prepare_file_name_to_look_for(file_name) in content:
 					using.append(filename)
 
 	return (using, looking_in)
