@@ -1,4 +1,3 @@
-from __future__ import print_function
 import sys
 import os
 
@@ -11,54 +10,40 @@ def main(argv):
 
 	views = find_view_files_in_directory(directory)
 
-	print()
 	print("Locating view files...")
-	print()
+	print_break()
 
-	print("View files found:")
-	print(views)
-	print()
+	print("View files found: {0}".format(len(views)))
+	print_break()
 
-	print("Locating references...")
+	print("Finding unused views...")
 	print_break()
 
 	for view_filename in views:
-
-		print(view_filename)
-		print()
-		
-		references = find_references_for_view_file(directory, view_filename)
+		references, looked_at = find_references_for_view_file(directory, view_filename)
 
 		if not references:
 			print("UNUSED VIEW: ", view_filename)
 			print_break()
-			continue
-		
-		for reference in references:
-			print("file name: ", reference[0])
-			print("line number: ", reference[1])
-			print("line text: ", reference[2])
-			print()
-		print_break()
-
 
 def print_break():
-	print("----------------------")
-	print()
+	print("-" * 45)
 
 def find_references_for_view_file(directory, viewfilename):
 	references = []
+	looking_in = []
 
 	for root, directories, files in os.walk(directory):
 		for filename in [f for f in files if any([f.endswith(ext) for ext in FILES_TO_SEARCH]) and not f == viewfilename + VIEW_EXTENSION]:
-			with open(os.path.join(root, filename), 'r') as searchfile:
+			looking_in.append(os.path.join(root, filename))
+			with open(os.path.join(root, filename), 'r', encoding="utf-8") as searchfile:
 				linenumber = 0
 				for line in searchfile:
 					linenumber += 1
-					if '"' + viewfilename + '"' in line if filename.endswith(VIEW_EXTENSION) else viewfilename in line :
+					if viewfilename in line :
 						references.append((filename, linenumber, line))
 
-	return references
+	return (references, looking_in)
 
 
 def find_view_files_in_directory(directory):
