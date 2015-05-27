@@ -1,72 +1,70 @@
-from __future__ import print_function
 import sys
 import os
 
-VIEW_EXTENSION = ".cshtml"
-
-FILES_TO_SEARCH = [".cshtml", "Controller.cs"]
+LOOKUP_EXTENSIONS = [".cshtml", ".gif", ".jpg", ".png", ".js", ".css"]
+FILES_TO_SEARCH = [".cshtml", ".cs", ".css", ".less", ".js"]
 
 def main(argv):
 	directory = argv[0]
 
-	views = find_view_files_in_directory(directory)
+	files_to_look_for = find_view_files_in_directory(directory)
 
-	print()
-	print("Locating view files...")
-	print()
-
-	print("View files found:")
-	print(views)
-	print()
-
-	print("Locating references...")
+	print_break()
+	print("Loading files...")
 	print_break()
 
-	for view_filename in views:
+	print("files to look for: {0}".format(len(files_to_look_for)))
+	print_break()
 
-		print(view_filename)
-		print()
-		
-		references = find_references_for_view_file(directory, view_filename)
+	print("Looking for unused files...")
+	print_break()
 
-		if not references:
-			print("UNUSED VIEW: ", view_filename)
-			print_break()
-			continue
-		
-		for reference in references:
-			print("file name: ", reference[0])
-			print("line number: ", reference[1])
-			print("line text: ", reference[2])
-			print()
-		print_break()
+	results = {'using': [], 'not_using': []}
 
+	for file_name in files_to_look_for:
+		references, looked_at = find_references_for_view_file(directory, file_name)
+
+		if references:
+			results['using'].append(file_name)
+		else:
+			results['not_using'].append(file_name)
+
+	print("USING: {0} files".format(len(results['using'])))
+	print("NOT USING: {0} files".format(len(results['not_using'])))
+	for file in results['not_using']:
+		print(file)
 
 def print_break():
-	print("----------------------")
-	print()
+	print("-" * 45)
 
-def find_references_for_view_file(directory, viewfilename):
-	references = []
+def prepare_file_name_to_look_for(file_name):
+	if ".cshtml" in file_name:
+		return file_name.replace(".cshtml", "")
+
+	return file_name
+
+def find_references_for_view_file(directory, file_name):
+	using = []
+	looking_in = []
 
 	for root, directories, files in os.walk(directory):
-		for filename in [f for f in files if any([f.endswith(ext) for ext in FILES_TO_SEARCH]) and not f == viewfilename + VIEW_EXTENSION]:
-			with open(os.path.join(root, filename), 'r') as searchfile:
-				linenumber = 0
-				for line in searchfile:
-					linenumber += 1
-					if '"' + viewfilename + '"' in line if filename.endswith(VIEW_EXTENSION) else viewfilename in line :
-						references.append((filename, linenumber, line))
+		for filename in [f for f in files if any([f.endswith(ext) for ext in FILES_TO_SEARCH])]:
+			looking_in.append(os.path.join(root, filename))
+			with open(os.path.join(root, filename), 'r', encoding="ISO-8859-1") as searchfile:
+				content = searchfile.read()
+				if prepare_file_name_to_look_for(file_name) in content:
+					using.append(filename)
 
-	return references
+	return (using, looking_in)
 
 
 def find_view_files_in_directory(directory):
 	views = []
 
 	for root, directories, files in os.walk(directory):
-		for filename in [f for f in files if f.endswith(VIEW_EXTENSION)]:
-			views.append(filename.replace(VIEW_EXTENSION, ""))
+		for ext in LOOKUP_EXTENSIONS:
+			for filename in [f for f in files if f.endswith(ext)]:
+				views.append(filename)
 
 	return views
 
